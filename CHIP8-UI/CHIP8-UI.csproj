@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>CHIP8_UI</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ROMs\**" />
+    <EmbeddedResource Remove="ROMs\**" />
+    <None Remove="ROMs\**" />
+    <Page Remove="ROMs\**" />
+  </ItemGroup>
+
+</Project>
