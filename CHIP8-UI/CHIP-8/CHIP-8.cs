@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -335,7 +336,7 @@ namespace CHIPInterpreter
                     break;
                 case 0x6:
                     V[0xF] = (byte)((V[data.X] & 0x1) != 0 ? 1 : 0);
-                    V[data.X] = (byte)(V[data.Y] / 2);
+                    V[data.X] = (byte)(V[data.Y] >> 1);
                     break;
                 case 0x7:
                     V[data.X] = (byte)(V[data.Y] - V[data.X]);
@@ -343,7 +344,7 @@ namespace CHIPInterpreter
                     break;
                 case 0xE:
                     V[0xF] = (byte)((V[data.X] & 0xF) != 0 ? 1 : 0);
-                    V[data.X] = (byte)(V[data.Y] * 2);
+                    V[data.X] = (byte)(V[data.Y] << 1);
                     break;
             }
         }
@@ -361,30 +362,34 @@ namespace CHIPInterpreter
         // 0xD
         void DrawSprite(Instruction data)
         {
-            byte x = V[data.X];
-            byte y = V[data.Y];
+            byte x = V[data.X], y = V[data.Y];
 
             V[0xF] = 0;
+            // N is the height of the sprite to be drawn
             for (byte i = 0; i < data.N; i++)
             {
+                // s is a byte of data representing the current row of pixels for the sprite
                 byte s = RAM[I + i];
                 for (int bit = 0; bit < 8; bit++)
                 {
-                    int posX = (x + bit) % SCREEN_WIDTH;
-                    int posY = (y + i) % SCREEN_HEIGHT;
+                    // Get screen position for drawing
+                    int posX = (x + bit) % SCREEN_WIDTH, posY = (y + i) % SCREEN_HEIGHT;
 
-                    int sBit = (s >> (7 - bit)) & 1;
                     int old = buffer[posX, posY] ? 1 : 0;
+
+                    // Shift s right by (7 - bit) so the last bit represents the bit needed by the current iteration
+                    // Ex. s = 224 $e0 0b11100000 (s >> (7 - 2)) == 56 $38 0b111000, AND masked with 1 gets the last bit of the value
+                    // (in this case that value is 0)
+                    // Debug // Trace.WriteLine($"D: {s >> (7 - bit)}    H: ${Convert.ToString(s >> (7 - bit), 16)}    B: {Convert.ToString(s >> (7 - bit), 2)}");
+                    int sBit = (s >> (7 - bit)) & 1;
 
                     if (old != sBit)
                         shouldRedraw = true;
 
+                    // XOR the old bit and the new bit
                     int newBit = old ^ sBit;
 
-                    if (newBit != 0)
-                        buffer[posX, posY] = true;
-                    else
-                        buffer[posX, posY] = false;
+                    buffer[posX, posY] = newBit == 1;
 
                     if(old == 1 && newBit == 0)
                     {
@@ -446,7 +451,7 @@ namespace CHIPInterpreter
         // 0xF 33
         void StoreBinaryCoded(Instruction data)
         {
-            RAM[I + 0] = (byte)(V[data.X] / 100 % 10);
+            RAM[I] = (byte)(V[data.X] / 100 % 10);
             RAM[I + 1] = (byte)(V[data.X] / 10 % 10);
             RAM[I + 2] = (byte)(V[data.X] % 10);
         }
