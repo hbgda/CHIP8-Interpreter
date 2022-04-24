@@ -13,11 +13,11 @@ namespace CHIPInterpreter
 
         Action<bool[,]> Draw;
         bool[,] buffer = new bool[SCREEN_WIDTH, SCREEN_HEIGHT];
+        bool shouldRedraw = true;
         
         // Not implemented
         Action<int> Beep;
 
-        bool shouldRedraw = true;
 
         byte Delay;
 

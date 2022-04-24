@@ -23,6 +23,7 @@ namespace CHIP8_UI
     public partial class MainWindow : Window
     {
         internal CHIP_8? chip;
+        internal Display? display;
 
         internal CancellationTokenSource ctSource = new CancellationTokenSource();
         internal CancellationToken ct;
@@ -38,50 +39,22 @@ namespace CHIP8_UI
         public MainWindow()
         {
             InitializeComponent();
-            chip = new CHIP_8(Draw, null);
+            display = new Display(CHIP_Display);
+            chip = new CHIP_8(display.DrawFrame, null);
             OpenROM();
         }
 
-        internal WriteableBitmap writeableBitmap = new WriteableBitmap(64, 32, 96, 96, PixelFormats.BlackWhite, null);
 
-        void InitializeCHIP8(string rom, Action<bool[,]> Draw, Action<int> Beep)
+        void InitializeCHIP8(string rom)
         {
             chip?.Load(File.ReadAllBytes(rom));
-
-            ctSource.Cancel();
 
             ctSource = new CancellationTokenSource();
             ct = ctSource.Token;
             Task.Run(Loop);
         }
 
-        void Draw(bool[,] buffer)
-        {
-            for (int y = 0; y < 32; y++)
-            {
-                for (int x = 0; x < 64; x++)
-                {
-                    try
-                    {
-                        byte[] colourData = new byte[] { 0, 0, 0, 0 };
-                        if (buffer[x, y])
-                        {
-                            colourData = new byte[] { 255, 255, 255, 255 };
-                        }
-
-                        Int32Rect rect = new Int32Rect(x, y, 1, 1);
-                        writeableBitmap.WritePixels(rect, colourData, 4, 0);
-                        CHIP_Display.Source = writeableBitmap;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                }
-            }
-        }
-
-        Stopwatch sw = Stopwatch.StartNew();
+        readonly Stopwatch sw = Stopwatch.StartNew();
         readonly TimeSpan _60hz = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / 60);
         readonly TimeSpan _frameTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / 1000);
         TimeSpan last;
@@ -131,7 +104,12 @@ namespace CHIP8_UI
             if(dialog.ShowDialog() == true)
             {
                 string file = dialog.FileName;
-                InitializeCHIP8(file, Draw, null);
+                InitializeCHIP8(file);
+            }
+            else
+            {
+                MessageBox.Show("No file selected.");
+                Application.Current.Shutdown();
             }
         }
     }
