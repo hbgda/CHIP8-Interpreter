@@ -327,23 +327,23 @@ namespace CHIPInterpreter
                     V[data.X] ^= V[data.Y];
                     break;
                 case 0x4:
-                    V[data.X] += V[data.Y];
                     V[0xF] = (byte)(V[data.X] + V[data.Y] > 0xFF ? 1 : 0);
+                    V[data.X] += V[data.Y];
                     break;
                 case 0x5:
-                    V[data.X] -= V[data.Y];
                     V[0xF] = (byte)(V[data.Y] > V[data.X] ? 0 : 1);
+                    V[data.X] -= V[data.Y];
                     break;
                 case 0x6:
-                    V[0xF] = (byte)((V[data.X] & 0x1) != 0 ? 1 : 0);
+                    V[0xF] = (byte)(V[data.X] & 0x1);
                     V[data.X] = (byte)(V[data.Y] >> 1);
                     break;
                 case 0x7:
-                    V[data.X] = (byte)(V[data.Y] - V[data.X]);
                     V[0xF] = (byte)(V[data.X] > V[data.Y] ? 1 : 0);
+                    V[data.X] = (byte)(V[data.Y] - V[data.X]);
                     break;
                 case 0xE:
-                    V[0xF] = (byte)((V[data.X] & 0xF) != 0 ? 1 : 0);
+                    V[0xF] = (byte)(V[data.X] & 0xF);
                     V[data.X] = (byte)(V[data.Y] << 1);
                     break;
             }
