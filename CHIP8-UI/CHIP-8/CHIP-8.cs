@@ -37,6 +37,25 @@ namespace CHIPInterpreter
         // 4K RAM
         byte[] RAM = new byte[0x1000];
 
+        byte[] fontset = { 
+            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+            0x20, 0x60, 0x20, 0x20, 0x70, // 1
+            0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2 
+            0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+            0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+            0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+            0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+            0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+            0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+            0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+            0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+            0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+            0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+            0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+            0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+            0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        };
+
 
         Dictionary<byte, Action<Instruction>> instructions;
         Dictionary<byte, Action<Instruction>> miscInstructions;
@@ -157,38 +176,7 @@ namespace CHIPInterpreter
             this.Draw = Draw;
             this.Beep = Beep;
 
-            SetFontDefault();
-        }
-
-
-        void SetFontDefault()
-        {
-            int offset = 0x0;
-            SetFontData(5 * offset++, FontData.D0);
-            SetFontData(5 * offset++, FontData.D1);
-            SetFontData(5 * offset++, FontData.D2);
-            SetFontData(5 * offset++, FontData.D3);
-            SetFontData(5 * offset++, FontData.D4);
-            SetFontData(5 * offset++, FontData.D5);
-            SetFontData(5 * offset++, FontData.D6);
-            SetFontData(5 * offset++, FontData.D7);
-            SetFontData(5 * offset++, FontData.D8);
-            SetFontData(5 * offset++, FontData.D9);
-            SetFontData(5 * offset++, FontData.DA);
-            SetFontData(5 * offset++, FontData.DB);
-            SetFontData(5 * offset++, FontData.DC);
-            SetFontData(5 * offset++, FontData.DD);
-            SetFontData(5 * offset++, FontData.DE);
-            SetFontData(5 * offset++, FontData.DF);
-        }
-
-        void SetFontData(int addr, long data)
-        {
-            RAM[addr++] = (byte)((data & 0xF000000000) >> 32);
-            RAM[addr++] = (byte)((data & 0x00F0000000) >> 24);
-            RAM[addr++] = (byte)((data & 0x0000F00000) >> 16);
-            RAM[addr++] = (byte)((data & 0x000000F000) >> 8);
-            RAM[addr++] = (byte)((data & 0x00000000F0) >> 0);
+            Array.Copy(fontset, 0, RAM, 0, fontset.Length);
         }
 
         public void Load(byte[] data)
@@ -327,23 +315,23 @@ namespace CHIPInterpreter
                     V[data.X] ^= V[data.Y];
                     break;
                 case 0x4:
-                    V[data.X] += V[data.Y];
                     V[0xF] = (byte)(V[data.X] + V[data.Y] > 0xFF ? 1 : 0);
+                    V[data.X] += V[data.Y];
                     break;
                 case 0x5:
-                    V[data.X] -= V[data.Y];
                     V[0xF] = (byte)(V[data.Y] > V[data.X] ? 0 : 1);
+                    V[data.X] -= V[data.Y];
                     break;
                 case 0x6:
-                    V[0xF] = (byte)((V[data.X] & 0x1) != 0 ? 1 : 0);
+                    V[0xF] = (byte)(V[data.X] & 0x1);
                     V[data.X] = (byte)(V[data.Y] >> 1);
                     break;
                 case 0x7:
-                    V[data.X] = (byte)(V[data.Y] - V[data.X]);
                     V[0xF] = (byte)(V[data.X] > V[data.Y] ? 1 : 0);
+                    V[data.X] = (byte)(V[data.Y] - V[data.X]);
                     break;
                 case 0xE:
-                    V[0xF] = (byte)((V[data.X] & 0xF) != 0 ? 1 : 0);
+                    V[0xF] = (byte)(V[data.X] & 0xF);
                     V[data.X] = (byte)(V[data.Y] << 1);
                     break;
             }

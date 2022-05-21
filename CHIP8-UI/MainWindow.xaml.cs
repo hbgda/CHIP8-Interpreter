@@ -99,7 +99,7 @@ namespace CHIP8_UI
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.DefaultExt = ".ch8";
-            dialog.Filter = "CHIP-8 ROM (*.ch8,*.c8)|*.ch8;*.c8";
+            dialog.Filter = "CHIP-8 ROM (*.ch8,*.c8;*.rom)|*.ch8;*.c8;*.rom";
 
             if(dialog.ShowDialog() == true)
             {
